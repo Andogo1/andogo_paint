@@ -1,0 +1,362 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="GeoBoard - collaborative geometry learning whiteboard">
+    <title>GeoBoard — Geometry Whiteboard</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Main Application -->
+    <div id="app">
+
+        <!-- Top Navigation -->
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-icon">G</div>
+                <div class="brand-name">GeoBoard</div>
+            </div>
+
+            <div class="room-info">
+                <span id="roomName">Geometry Room</span>
+                <span id="connectionStatus" class="status offline">
+                    Offline
+                </span>
+            </div>
+
+            <div class="top-actions">
+                <button id="shareBtn" class="top-button">
+                    Share
+                </button>
+
+                <button id="settingsBtn" class="top-button icon-button" aria-label="Settings">
+                    ⚙
+                </button>
+            </div>
+        </header>
+
+        <!-- Workspace -->
+        <main class="workspace">
+
+            <!-- Left Toolbar -->
+            <aside class="toolbar">
+
+                <button class="tool active"
+                        data-tool="select"
+                        title="Select">
+                    ↖
+                </button>
+
+                <button class="tool"
+                        data-tool="pan"
+                        title="Move canvas">
+                    ✋
+                </button>
+
+                <div class="toolbar-divider"></div>
+
+                <button class="tool"
+                        data-tool="pen"
+                        title="Draw">
+                    ✎
+                </button>
+
+                <button class="tool"
+                        data-tool="line"
+                        title="Line">
+                    ╱
+                </button>
+
+                <button class="tool"
+                        data-tool="arrow"
+                        title="Arrow">
+                    ➜
+                </button>
+
+                <div class="toolbar-divider"></div>
+
+                <button class="tool"
+                        data-tool="circle"
+                        title="Circle">
+                    ○
+                </button>
+
+                <button class="tool"
+                        data-tool="rectangle"
+                        title="Rectangle">
+                    □
+                </button>
+
+                <button class="tool"
+                        data-tool="triangle"
+                        title="Triangle">
+                    △
+                </button>
+
+                <button class="tool"
+                        data-tool="polygon"
+                        title="Polygon">
+                    ⬠
+                </button>
+
+                <div class="toolbar-divider"></div>
+
+                <button class="tool"
+                        data-tool="text"
+                        title="Text">
+                    T
+                </button>
+
+                <button class="tool"
+                        data-tool="image"
+                        title="Add image">
+                    🖼
+                </button>
+
+                <button class="tool"
+                        data-tool="formula"
+                        title="Math formula">
+                    ∑
+                </button>
+
+                <div class="toolbar-divider"></div>
+
+                <button class="tool"
+                        data-tool="angle"
+                        title="Angle">
+                    ∠
+                </button>
+
+                <button class="tool"
+                        data-tool="measure"
+                        title="Measure">
+                    📏
+                </button>
+
+                <button class="tool"
+                        data-tool="grid"
+                        title="Grid">
+                    #
+                </button>
+
+            </aside>
+
+            <!-- Canvas Area -->
+            <section class="canvas-area">
+
+                <canvas id="boardCanvas"></canvas>
+
+                <!-- Empty board message -->
+                <div id="emptyBoard" class="empty-board">
+                    <div class="empty-icon">📐</div>
+                    <h2>Geometry Board</h2>
+                    <p>
+                        Draw shapes, solve problems and learn together.
+                    </p>
+                </div>
+
+                <!-- Floating bottom controls -->
+                <div class="canvas-controls">
+
+                    <button id="undoBtn"
+                            class="canvas-control"
+                            title="Undo">
+                        ↶
+                    </button>
+
+                    <button id="redoBtn"
+                            class="canvas-control"
+                            title="Redo">
+                        ↷
+                    </button>
+
+                    <div class="control-divider"></div>
+
+                    <button id="zoomOutBtn"
+                            class="canvas-control"
+                            title="Zoom out">
+                        −
+                    </button>
+
+                    <span id="zoomLevel">100%</span>
+
+                    <button id="zoomInBtn"
+                            class="canvas-control"
+                            title="Zoom in">
+                        +
+                    </button>
+
+                    <button id="resetViewBtn"
+                            class="canvas-control"
+                            title="Reset view">
+                        ⛶
+                    </button>
+
+                </div>
+
+            </section>
+
+            <!-- Right Side Panel -->
+            <aside id="sidePanel" class="side-panel">
+
+                <div class="panel-header">
+                    <h3>Properties</h3>
+
+                    <button id="closePanelBtn"
+                            class="close-panel"
+                            aria-label="Close">
+                        ×
+                    </button>
+                </div>
+
+                <div id="propertiesContent" class="properties-content">
+
+                    <div class="property-empty">
+                        <div class="property-icon">📐</div>
+                        <p>Select an object to edit its properties.</p>
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </main>
+
+        <!-- Bottom Status Bar -->
+        <footer class="statusbar">
+
+            <div class="status-left">
+                <span id="cursorPosition">
+                    X: 0&nbsp;&nbsp; Y: 0
+                </span>
+            </div>
+
+            <div class="status-center">
+                <span id="objectCount">
+                    0 objects
+                </span>
+            </div>
+
+            <div class="status-right">
+                <span id="collaborators">
+                    1 person
+                </span>
+            </div>
+
+        </footer>
+
+    </div>
+
+    <!-- Hidden File Input -->
+    <input
+        type="file"
+        id="imageInput"
+        accept="image/*"
+        hidden
+    >
+
+    <!-- Share Modal -->
+    <div id="shareModal"
+         class="modal hidden"
+         role="dialog"
+         aria-modal="true">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h2>Share GeoBoard</h2>
+
+                <button id="closeShareModal"
+                        class="modal-close"
+                        aria-label="Close">
+                    ×
+                </button>
+            </div>
+
+            <p>
+                Copy this link and send it to your classmate or teacher.
+            </p>
+
+            <div class="share-link-container">
+
+                <input
+                    id="shareLink"
+                    type="text"
+                    readonly
+                    value=""
+                >
+
+                <button id="copyLinkBtn">
+                    Copy
+                </button>
+
+            </div>
+
+            <div id="copyMessage" class="copy-message"></div>
+
+        </div>
+
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal"
+         class="modal hidden"
+         role="dialog"
+         aria-modal="true">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h2>Settings</h2>
+
+                <button id="closeSettingsModal"
+                        class="modal-close"
+                        aria-label="Close">
+                    ×
+                </button>
+            </div>
+
+            <div class="settings-section">
+
+                <label for="gridToggle">
+                    <span>Show grid</span>
+                    <input
+                        type="checkbox"
+                        id="gridToggle"
+                        checked
+                    >
+                </label>
+
+                <label for="snapToggle">
+                    <span>Snap to points</span>
+                    <input
+                        type="checkbox"
+                        id="snapToggle"
+                        checked
+                    >
+                </label>
+
+                <label for="darkModeToggle">
+                    <span>Dark mode</span>
+                    <input
+                        type="checkbox"
+                        id="darkModeToggle"
+                    >
+                </label>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
+```
