@@ -4,359 +4,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#ffffff">
-    <meta name="description" content="GeoBoard - collaborative geometry learning whiteboard">
-    <title>GeoBoard — Geometry Whiteboard</title>
+    <title>Andogo Paint</title>
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #202124;
+            color: white;
+            overflow: hidden;
+        }
+
+        .topbar {
+            height: 64px;
+            background: #292a2d;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            border-bottom: 1px solid #444;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        button {
+            background: #3b3d42;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 9px 14px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #505258;
+        }
+
+        button.active {
+            background: #1976d2;
+            border-color: #2196f3;
+        }
+
+        input[type="color"] {
+            width: 42px;
+            height: 36px;
+            border: none;
+            padding: 0;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"] {
+            width: 110px;
+        }
+
+        .size-label {
+            min-width: 45px;
+        }
+
+        .workspace {
+            height: calc(100vh - 64px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #151618;
+            padding: 20px;
+        }
+
+        .canvas-container {
+            background: white;
+            box-shadow: 0 0 25px rgba(0,0,0,0.5);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            background: white;
+            cursor: crosshair;
+        }
+
+        @media (max-width: 900px) {
+            .topbar {
+                overflow-x: auto;
+            }
+
+            canvas {
+                width: 90vw;
+                height: auto;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Main Application -->
-    <div id="app">
 
-        <!-- Top Navigation -->
-        <header class="topbar">
-            <div class="brand">
-                <div class="brand-icon">G</div>
-                <div class="brand-name">GeoBoard</div>
-            </div>
+    <div class="topbar">
 
-            <div class="room-info">
-                <span id="roomName">Geometry Room</span>
-                <span id="connectionStatus" class="status offline">
-                    Offline
-                </span>
-            </div>
+        <div class="logo">🎨 Andogo Paint</div>
 
-            <div class="top-actions">
-                <button id="shareBtn" class="top-button">
-                    Share
-                </button>
+        <button id="penBtn" class="active">🖊️ Pen</button>
+        <button id="eraserBtn">🧽 Eraser</button>
 
-                <button id="settingsBtn" class="top-button icon-button" aria-label="Settings">
-                    ⚙
-                </button>
-            </div>
-        </header>
+        <input type="color" id="colorPicker" value="#000000">
 
-        <!-- Workspace -->
-        <main class="workspace">
+        <span>Size:</span>
 
-            <!-- Left Toolbar -->
-            <aside class="toolbar">
+        <input type="range" id="sizeSlider" min="1" max="50" value="5">
 
-                <button class="tool active"
-                        data-tool="select"
-                        title="Select">
-                    ↖
-                </button>
+        <span class="size-label" id="sizeValue">5px</span>
 
-                <button class="tool"
-                        data-tool="pan"
-                        title="Move canvas">
-                    ✋
-                </button>
-
-                <div class="toolbar-divider"></div>
-
-                <button class="tool"
-                        data-tool="pen"
-                        title="Draw">
-                    ✎
-                </button>
-
-                <button class="tool"
-                        data-tool="line"
-                        title="Line">
-                    ╱
-                </button>
-
-                <button class="tool"
-                        data-tool="arrow"
-                        title="Arrow">
-                    ➜
-                </button>
-
-                <div class="toolbar-divider"></div>
-
-                <button class="tool"
-                        data-tool="circle"
-                        title="Circle">
-                    ○
-                </button>
-
-                <button class="tool"
-                        data-tool="rectangle"
-                        title="Rectangle">
-                    □
-                </button>
-
-                <button class="tool"
-                        data-tool="triangle"
-                        title="Triangle">
-                    △
-                </button>
-
-                <button class="tool"
-                        data-tool="polygon"
-                        title="Polygon">
-                    ⬠
-                </button>
-
-                <div class="toolbar-divider"></div>
-
-                <button class="tool"
-                        data-tool="text"
-                        title="Text">
-                    T
-                </button>
-
-                <button class="tool"
-                        data-tool="image"
-                        title="Add image">
-                    🖼
-                </button>
-
-                <button class="tool"
-                        data-tool="formula"
-                        title="Math formula">
-                    ∑
-                </button>
-
-                <div class="toolbar-divider"></div>
-
-                <button class="tool"
-                        data-tool="angle"
-                        title="Angle">
-                    ∠
-                </button>
-
-                <button class="tool"
-                        data-tool="measure"
-                        title="Measure">
-                    📏
-                </button>
-
-                <button class="tool"
-                        data-tool="grid"
-                        title="Grid">
-                    #
-                </button>
-
-            </aside>
-
-            <!-- Canvas Area -->
-            <section class="canvas-area">
-
-                <canvas id="boardCanvas"></canvas>
-
-                <!-- Empty board message -->
-                <div id="emptyBoard" class="empty-board">
-                    <div class="empty-icon">📐</div>
-                    <h2>Geometry Board</h2>
-                    <p>
-                        Draw shapes, solve problems and learn together.
-                    </p>
-                </div>
-
-                <!-- Floating bottom controls -->
-                <div class="canvas-controls">
-
-                    <button id="undoBtn"
-                            class="canvas-control"
-                            title="Undo">
-                        ↶
-                    </button>
-
-                    <button id="redoBtn"
-                            class="canvas-control"
-                            title="Redo">
-                        ↷
-                    </button>
-
-                    <div class="control-divider"></div>
-
-                    <button id="zoomOutBtn"
-                            class="canvas-control"
-                            title="Zoom out">
-                        −
-                    </button>
-
-                    <span id="zoomLevel">100%</span>
-
-                    <button id="zoomInBtn"
-                            class="canvas-control"
-                            title="Zoom in">
-                        +
-                    </button>
-
-                    <button id="resetViewBtn"
-                            class="canvas-control"
-                            title="Reset view">
-                        ⛶
-                    </button>
-
-                </div>
-
-            </section>
-
-            <!-- Right Side Panel -->
-            <aside id="sidePanel" class="side-panel">
-
-                <div class="panel-header">
-                    <h3>Properties</h3>
-
-                    <button id="closePanelBtn"
-                            class="close-panel"
-                            aria-label="Close">
-                        ×
-                    </button>
-                </div>
-
-                <div id="propertiesContent" class="properties-content">
-
-                    <div class="property-empty">
-                        <div class="property-icon">📐</div>
-                        <p>Select an object to edit its properties.</p>
-                    </div>
-
-                </div>
-
-            </aside>
-
-        </main>
-
-        <!-- Bottom Status Bar -->
-        <footer class="statusbar">
-
-            <div class="status-left">
-                <span id="cursorPosition">
-                    X: 0&nbsp;&nbsp; Y: 0
-                </span>
-            </div>
-
-            <div class="status-center">
-                <span id="objectCount">
-                    0 objects
-                </span>
-            </div>
-
-            <div class="status-right">
-                <span id="collaborators">
-                    1 person
-                </span>
-            </div>
-
-        </footer>
+        <button id="undoBtn">↩ Undo</button>
+        <button id="redoBtn">↪ Redo</button>
+        <button id="clearBtn">🗑️ Clear</button>
+        <button id="saveBtn">💾 Save</button>
 
     </div>
 
-    <!-- Hidden File Input -->
-    <input
-        type="file"
-        id="imageInput"
-        accept="image/*"
-        hidden
-    >
-
-    <!-- Share Modal -->
-    <div id="shareModal"
-         class="modal hidden"
-         role="dialog"
-         aria-modal="true">
-
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h2>Share GeoBoard</h2>
-
-                <button id="closeShareModal"
-                        class="modal-close"
-                        aria-label="Close">
-                    ×
-                </button>
-            </div>
-
-            <p>
-                Copy this link and send it to your classmate or teacher.
-            </p>
-
-            <div class="share-link-container">
-
-                <input
-                    id="shareLink"
-                    type="text"
-                    readonly
-                    value=""
-                >
-
-                <button id="copyLinkBtn">
-                    Copy
-                </button>
-
-            </div>
-
-            <div id="copyMessage" class="copy-message"></div>
-
+    <div class="workspace">
+        <div class="canvas-container">
+            <canvas id="canvas" width="1200" height="700"></canvas>
         </div>
-
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal"
-         class="modal hidden"
-         role="dialog"
-         aria-modal="true">
 
-        <div class="modal-content">
+<script>
 
-            <div class="modal-header">
-                <h2>Settings</h2>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-                <button id="closeSettingsModal"
-                        class="modal-close"
-                        aria-label="Close">
-                    ×
-                </button>
-            </div>
+const penBtn = document.getElementById("penBtn");
+const eraserBtn = document.getElementById("eraserBtn");
+const colorPicker = document.getElementById("colorPicker");
+const sizeSlider = document.getElementById("sizeSlider");
+const sizeValue = document.getElementById("sizeValue");
 
-            <div class="settings-section">
+const undoBtn = document.getElementById("undoBtn");
+const redoBtn = document.getElementById("redoBtn");
+const clearBtn = document.getElementById("clearBtn");
+const saveBtn = document.getElementById("saveBtn");
 
-                <label for="gridToggle">
-                    <span>Show grid</span>
-                    <input
-                        type="checkbox"
-                        id="gridToggle"
-                        checked
-                    >
-                </label>
+let drawing = false;
+let eraser = false;
 
-                <label for="snapToggle">
-                    <span>Snap to points</span>
-                    <input
-                        type="checkbox"
-                        id="snapToggle"
-                        checked
-                    >
-                </label>
+let history = [];
+let historyIndex = -1;
 
-                <label for="darkModeToggle">
-                    <span>Dark mode</span>
-                    <input
-                        type="checkbox"
-                        id="darkModeToggle"
-                    >
-                </label>
 
-            </div>
+// White background
+function resetCanvas() {
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
-        </div>
 
-    </div>
+// Save current canvas to history
+function saveHistory() {
 
-    <!-- JavaScript -->
-    <script src="script.js"></script>
+    if (historyIndex < history.length - 1) {
+        history = history.slice(0, historyIndex + 1);
+    }
+
+    history.push(canvas.toDataURL());
+    historyIndex++;
+
+    if (history.length > 50) {
+        history.shift();
+        historyIndex--;
+    }
+}
+
+
+// Restore canvas from history
+function restoreHistory(index) {
+
+    if (index < 0 || index >= history.length) return;
+
+    const image = new Image();
+
+    image.onload = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0);
+    };
+
+    image.src = history[index];
+}
+
+
+// Get mouse position
+function getPosition(e) {
+
+    const rect = canvas.getBoundingClientRect();
+
+    return {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
+
+
+// Start drawing
+canvas.addEventListener("mousedown", function(e) {
+
+    drawing = true;
+
+    const pos = getPosition(e);
+
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    ctx.strokeStyle = eraser ? "white" : colorPicker.value;
+    ctx.lineWidth = sizeSlider.value;
+
+    // Make a dot when clicking
+    ctx.lineTo(pos.x + 0.01, pos.y + 0.01);
+    ctx.stroke();
+
+});
+
+
+// Draw
+canvas.addEventListener("mousemove", function(e) {
+
+    if (!drawing) return;
+
+    const pos = getPosition(e);
+
+    ctx.strokeStyle = eraser ? "white" : colorPicker.value;
+    ctx.lineWidth = sizeSlider.value;
+
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+
+});
+
+
+// Stop drawing
+canvas.addEventListener("mouseup", function() {
+
+    if (!drawing) return;
+
+    drawing = false;
+    ctx.closePath();
+
+    saveHistory();
+
+});
+
+
+canvas.addEventListener("mouseleave", function() {
+
+    if (drawing) {
+        drawing = false;
+        ctx.closePath();
+        saveHistory();
+    }
+
+});
+
+
+// Pen
+penBtn.addEventListener("click", function() {
+
+    eraser = false;
+
+    penBtn.classList.add("active");
+    eraserBtn.classList.remove("active");
+
+});
+
+
+// Eraser
+eraserBtn.addEventListener("click", function() {
+
+    eraser = true;
+
+    eraserBtn.classList.remove("active");
+    penBtn.classList.remove("active");
+
+});
+
+
+// Size
+sizeSlider.addEventListener("input", function() {
+
+    sizeValue.textContent = sizeSlider.value + "px";
+
+});
+
+
+// Undo
+undoBtn.addEventListener("click", function() {
+
+    if (historyIndex > 0) {
+
+        historyIndex--;
+
+        restoreHistory(historyIndex);
+
+    }
+
+});
+
+
+// Redo
+redoBtn.addEventListener("click", function() {
+
+    if (historyIndex < history.length - 1) {
+
+        historyIndex++;
+
+        restoreHistory(historyIndex);
+
+    }
+
+});
+
+
+// Clear
+clearBtn.addEventListener("click", function() {
+
+    saveHistory();
+
+    resetCanvas();
+
+    saveHistory();
+
+});
+
+
+// Save PNG
+saveBtn.addEventListener("click", function() {
+
+    const link = document.createElement("a");
+
+    link.download = "andogo-paint.png";
+    link.href = canvas.toDataURL("image/png");
+
+    link.click();
+
+});
+
+
+// Initial canvas
+resetCanvas();
+saveHistory();
+
+</script>
+
 </body>
 </html>
 ```
